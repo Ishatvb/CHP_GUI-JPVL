@@ -43,7 +43,6 @@ class MainWindow(QMainWindow):
         self.ui.frame_6.setLayout(QVBoxLayout())
         self.ui.frame_6.layout().addWidget(self.graph_tail)
         
-        
         # Setup timer for updating the plots
         self.timer = QTimer()
         self.timer.timeout.connect(self.update)
@@ -86,6 +85,9 @@ class MainWindow(QMainWindow):
         self.sensor_data_head[-1] = head
         self.sensor_data_tail[-1] = tail
         
+        # Update x-axis values to maintain full history
+        self.x = np.arange(len(self.sensor_data_hopper))
+        
         # Determine plot color based on the latest value
         hopper_color = self.get_color(hopper)
         head_color = self.get_color(head)
@@ -105,6 +107,7 @@ class MainWindow(QMainWindow):
         self.ui.label_5.setText(f'Hopper: {hopper:.2f}')
         self.ui.label_12.setText(f'Head: {head:.2f}')
         self.ui.label_14.setText(f'Tail: {tail:.2f}')
+
 
     def get_color(self, value):
         if value > 8:
