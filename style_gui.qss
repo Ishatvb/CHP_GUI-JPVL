@@ -1,0 +1,123 @@
+/* Styles for MainWindow */
+#MainWindow {
+    background-color: #f0f2f5; /* Light grey background */
+}
+
+/* Styles for button to change menu style */
+#change_btn {
+    padding: 5px;
+    border: none;
+    width: 30px;
+    height: 30px;
+    background-color: #70B9FE; /* Light blue background */
+    color: #ffffff; /* White text color */
+    font-size: 14px; /* Font size */
+    border-radius: 50%; /* Circular button */
+    transition: background-color 0.3s ease; /* Smooth hover transition */
+}
+
+#change_btn:hover {
+    background-color: #8ac4ff; /* Darker blue on hover */
+}
+
+/* Styles for header widget */
+#widget {
+    background-color: #ffffff; /* White background */
+    border-bottom: 1px solid #e0e0e0; /* Light grey border bottom */
+    padding: 10px 20px; /* Padding for inner content */
+    font-family: 'Segoe UI', Arial, sans-serif; /* Example of font */
+}
+
+/* Styles for menu with icon only */
+#icon_only_widget {
+    background-color: #1f2d3d; /* Dark blue background */
+    width: 60px; /* Increased width for icons */
+}
+
+#icon_only_widget QPushButton, QLabel {
+    height: 60px; /* Increased button and label height */
+    border: none;
+    color: #ffffff; /* White text color */
+    font-size: 14px; /* Font size */
+    font-weight: bold; /* Bold font */
+    font-family: 'Roboto', Arial, sans-serif; /* Example of font */
+}
+
+#icon_only_widget QPushButton:hover {
+    background-color: rgba(86, 101, 115, 0.5); /* Semi-transparent darker blue on hover */
+    transform: scale(1.1); /* Scale effect on hover */
+    transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth transition */
+}
+
+/* Styles for menu with icon and text */
+#full_menu_widget {
+    background-color: #1f2d3d; /* Dark blue background */
+}
+
+#full_menu_widget QPushButton {
+    border: none;
+    border-radius: 5px; /* Rounded corners */
+    text-align: left;
+    padding: 12px 20px; /* Increased padding */
+    color: #b0bec5; /* Light grey text color */
+    font-size: 16px; /* Larger font size */
+    font-family: 'Montserrat', Arial, sans-serif; /* Example of font */
+}
+
+#full_menu_widget QPushButton:hover {
+    background-color: rgba(86, 101, 115, 0.5); /* Semi-transparent darker blue on hover */
+    color: #ffffff; /* White text on hover */
+}
+
+#full_menu_widget QPushButton:checked {
+    background-color: #455a6e; /* Darker blue when checked */
+    color: #ffffff; /* White text when checked */
+}
+
+/* Styles for search button */
+#search_btn {
+    border: none;
+    background-color: #70B9FE; /* Light blue background */
+    color: #ffffff; /* White text color */
+    padding: 12px 20px; /* Padding */
+    border-radius: 5px; /* Rounded corners */
+    font-size: 14px; /* Font size */
+    font-family: 'Open Sans', Arial, sans-serif; /* Example of font */
+    transition: background-color 0.3s ease; /* Smooth hover transition */
+}
+
+#search_btn:hover {
+    background-color: #8ac4ff; /* Darker blue on hover */
+}
+
+/* Styles for search input */
+#search_input {
+    border: 1px solid #cfd8dc; /* Light grey border */
+    padding: 10px 15px; /* Padding */
+    font-size: 14px; /* Font size */
+    font-family: 'Arial', sans-serif; /* Example of font */
+}
+
+#search_input:focus {
+    background-color: #ffffff; /* White background on focus */
+    border-color: #70B9FE; /* Light blue border on focus */
+}
+
+/* Styles for user information button */
+#user_btn {
+    border: none;
+    background-color: transparent; /* Transparent background */
+    color: #607d8b; /* Grey text color */
+    font-size: 14px; /* Font size */
+    padding: 12px 20px; /* Padding */
+    font-family: 'Roboto', Arial, sans-serif; /* Example of font */
+}
+
+#user_btn:hover {
+    color: #000000; /* Black text color on hover */
+    cursor: pointer; /* Pointer cursor on hover */
+}
+
+/* Additional styles as needed */
+
+/* Styles for specific widgets or components can be added below */
