@@ -2,6 +2,11 @@ import sys
 import numpy as np
 import random
 import cv2
+import serial 
+import time
+import csv
+from datetime import datetime
+import RPi.GPIO as GPIO
 from PyQt5.QtCore import QTimer, QFile, QTextStream, Qt
 from PyQt5.QtWidgets import QMainWindow, QApplication, QVBoxLayout, QPushButton, QLabel, QSizePolicy
 import pyqtgraph as pg
@@ -98,6 +103,18 @@ class MainWindow(QMainWindow):
         self.ui.label_55.layout().addWidget(self.video_player)
 
         self.connect_signals()
+
+        #Initialize serial connections
+        self.ser0 = serial.Serial('/dev/ttyAMA0', 115200)
+        self.ser1 = serial.Serial('/dev/ttyAMA3', 115200, timeout=3)
+        self.ser2 = serial.Serial('/dev/ttyAMA4', 115200, timeout=3)
+
+        # Initialize CSV file
+        self.csvfile = open('Experiment_1.csv', 'a', newline='')
+        self.fieldnames = ['Date', 'Current_Time', 'Luna_Distance_Hopper', 'Luna_Distance_Head', 'Luna_Distance_Tail', 'Spilage']
+        self.writer = csv.DictWriter(self.csvfile, fieldnames=self.fieldnames)
+        if self.csvfile.tell() == 0:
+            self.writer.writeheader()
         
     def connect_signals(self):
         self.ui.scada_btn_1.toggled.connect(self.on_scada_btn_1_toggled)
@@ -116,12 +133,41 @@ class MainWindow(QMainWindow):
         self.ui.user_btn.clicked.connect(self.on_user_btn_clicked)
         self.ui.stackedWidget.currentChanged.connect(self.on_stackedWidget_currentChanged)
 
+    def parse_lidar_data(data):
+    #print(data[1])
+        if data[0] == 0x59 and data[1] == 0x59:
+            distance = (data[3] << 8) | data[2]
+            return distance / 100.0
+        else:
+            print("Invalid frame header")
+            return None
+
     def read_sensor_data(self):
         # Simulate reading new data from sensors
-        hopper_data = random.uniform(4, 9)  # Simulate hopper data
-        head_data = random.uniform(3, 6)    # Simulate head data
-        tail_data = random.uniform(3, 6)    # Simulate tail data
-        return hopper_data, head_data, tail_data
+        # hopper_data = random.uniform(4, 9)  # Simulate hopper data
+        # head_data = random.uniform(3, 6)    # Simulate head data
+        # tail_data = random.uniform(3, 6)    # Simulate tail data
+        # return hopper_data, head_data, tail_data
+
+        self.ser0.reset_input_buffer()
+        self.ser1.reset_input_buffer()
+        self.ser2.reset_input_buffer()
+        data0 = self.ser0.read(9)
+        data1 = self.ser1.read(9)
+        data2 = self.ser2.read(9)
+
+        hopper_data = self.parse_lidar_data(data0)
+        head_data = self.parse_lidar_data(data1)
+        tail_data = self.parse_lidar_data(data2)
+
+        if hopper_data is not None and head_data is not None and tail_data is not None:
+            print("Luna Distance_Hopper:", hopper_data * 100, "cm")
+            print("Luna Distance_Head:", head_data * 100, "cm")
+            print("Luna Distance_Tail:", tail_data * 100, "cm")
+
+            return hopper_data * 100, head_data * 100, tail_data * 100
+        else:
+            return 0, 0, 0  # Return 0 if any distance is None
 
     def update(self):
         # Read new sensor data
@@ -161,6 +207,9 @@ class MainWindow(QMainWindow):
         self.ui.label_14.setText(f'Tail: {tail:.2f}')
         self.ui.label_54.setText(f'Tail: {tail:.2f}')
 
+        # Write data to CSV file
+        self.write_to_csv(hopper, head, tail)
+
         # Display current status based on the sensor readings
         status = self.get_status(hopper, head, tail)
         self.ui.label_57.setText(status)
@@ -187,6 +236,45 @@ class MainWindow(QMainWindow):
     def update_plot(self, plot_widget, data, color):
         plot_widget.plotItem.clear()
         plot_widget.plotItem.plot(self.x, data, pen=color)
+
+    def get_color_hopper(self, value):
+        if value > 8:
+            return 'r'
+        elif value > 5:
+            return 'y'
+        else:
+            return 'g'
+        
+    def get_color_head(self, value):
+        if value > 8:
+            return 'r'
+        elif value > 5:
+            return 'y'
+        else:
+            return 'g'
+        
+    def get_color_tail(self, value):
+        if value > 8:
+            return 'r'
+        elif value > 5:
+            return 'y'
+        else:
+            return 'g'
+        
+    def write_to_csv(self, hopper, head, tail):
+        try:
+            current_time = datetime.now().strftime('%H:%M:%S')
+            self.writer.writerow({
+                'Date': datetime.now().strftime('%Y-%m-%d'),
+                'Current_Time': current_time,
+                'Luna_Distance_Hopper': hopper,
+                'Luna_Distance_Head': head,
+                'Luna_Distance_Tail': tail,
+                'Spilage': 0  # Placeholder for Spilage
+            })
+            self.csvfile.flush()
+        except Exception as e:
+            print(f"Error writing to CSV: {e}")
 
     def update_video(self):
         # Read frames from cameras
@@ -218,29 +306,7 @@ class MainWindow(QMainWindow):
             # Set the QImage to the QLabel
             self.label_tail_main.setPixmap(QPixmap.fromImage(img_tail))
 
-    def get_color_hopper(self, value):
-        if value > 8:
-            return 'r'
-        elif value > 5:
-            return 'y'
-        else:
-            return 'g'
-        
-    def get_color_head(self, value):
-        if value > 8:
-            return 'r'
-        elif value > 5:
-            return 'y'
-        else:
-            return 'g'
-        
-    def get_color_tail(self, value):
-        if value > 8:
-            return 'r'
-        elif value > 5:
-            return 'y'
-        else:
-            return 'g'
+
 
     def get_status(self, hopper, head, tail):
         # Define thresholds and ranges
@@ -376,6 +442,17 @@ class MainWindow(QMainWindow):
         if index == 0:
             # Update SCADA page elements
             self.update()
+
+    def closeEvent(self, event):
+        # Cleanup serial connections and CSV file on exit
+        self.ser0.close()
+        self.ser1.close()
+        self.ser2.close()
+        self.csvfile.close()
+        self.capture_hopper.release()
+        self.capture_head.release()
+        self.capture_tail.release()
+        super(MainWindow, self).closeEvent(event)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
