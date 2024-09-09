@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="icon">
+    <file>images/fullscada4.png</file>
+    <file>images/fullscada3.png</file>
     <file>icons/dashboard-5-48.ico</file>
     <file>icons/align-justify.svg</file>
     <file>icons/user-48.ico</file>
@@ -18,6 +20,19 @@
     <file>icons/account-logout-64.ico</file>
   </qresource>
   <qresource prefix="images">
+    <file>images/fullscada4.png</file>
+    <file>images/fullscada3.png</file>
+    <file>images/hopperscada1.png</file>
+    <file>images/tailscada.png</file>
+    <file>images/scadav2.mp4</file>
+    <file>images/scadav1.mp4</file>
+    <file>images/juetlogo.png</file>
+    <file>images/Jaypee_Group_Logo.svg.png</file>
+    <file>images/Jaypee-Group.jpg</file>
+    <file>images/hopperscada.png</file>
+    <file>images/headscada.png</file>
+    <file>images/fullscada2.png</file>
+    <file>images/fullscada1.png</file>
     <file>images/juetlogo.png</file>
     <file>images/Jaypee_Group_Logo.svg.png</file>
     <file>images/Jaypee-Group.jpg</file>

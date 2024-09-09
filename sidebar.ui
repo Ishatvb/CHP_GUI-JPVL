@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1430</width>
-    <height>649</height>
+    <width>1415</width>
+    <height>711</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -609,7 +609,7 @@
        <item>
         <widget class="QStackedWidget" name="stackedWidget">
          <property name="currentIndex">
-          <number>3</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="page">
           <layout class="QGridLayout" name="gridLayout_3">
@@ -642,6 +642,56 @@
              <property name="frameShadow">
               <enum>QFrame::Raised</enum>
              </property>
+             <layout class="QVBoxLayout" name="verticalLayout_17">
+              <item>
+               <widget class="QFrame" name="frame_22">
+                <property name="frameShape">
+                 <enum>QFrame::StyledPanel</enum>
+                </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Raised</enum>
+                </property>
+                <layout class="QHBoxLayout" name="horizontalLayout_9">
+                 <item>
+                  <widget class="QLabel" name="label_56">
+                   <property name="text">
+                    <string>STATUS</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="label_57">
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_55">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="pixmap">
+                 <pixmap resource="resource.qrc">:/images/images/fullscada4.png</pixmap>
+                </property>
+                <property name="scaledContents">
+                 <bool>true</bool>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </widget>
            </item>
           </layout>
@@ -922,9 +972,15 @@
            </item>
            <item row="1" column="1">
             <widget class="QFrame" name="frame_9">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="maximumSize">
               <size>
-               <width>1000</width>
+               <width>16777215</width>
                <height>16777215</height>
               </size>
              </property>
@@ -966,6 +1022,12 @@
                 </property>
                 <property name="text">
                  <string/>
+                </property>
+                <property name="pixmap">
+                 <pixmap resource="resource.qrc">:/images/images/hopperscada1.png</pixmap>
+                </property>
+                <property name="scaledContents">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1158,6 +1220,12 @@
                 </property>
                 <property name="text">
                  <string/>
+                </property>
+                <property name="pixmap">
+                 <pixmap resource="resource.qrc">:/images/images/headscada.png</pixmap>
+                </property>
+                <property name="scaledContents">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1547,6 +1615,12 @@
                 <property name="text">
                  <string/>
                 </property>
+                <property name="pixmap">
+                 <pixmap resource="resource.qrc">:/images/images/tailscada.png</pixmap>
+                </property>
+                <property name="scaledContents">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
              </layout>
@@ -1729,8 +1803,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>756</width>
-                <height>471</height>
+                <width>98</width>
+                <height>150</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_10">
@@ -2068,14 +2142,14 @@
            </property>
           </widget>
          </item>
+         <item>
+          <widget class="QPushButton" name="power_btn_1">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
         </layout>
-       </item>
-       <item>
-        <widget class="QPushButton" name="power_btn_1">
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
        </item>
        <item>
         <spacer name="verticalSpacer">
@@ -2094,6 +2168,12 @@
         <widget class="QPushButton" name="history_btn_1">
          <property name="text">
           <string/>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>true</bool>
          </property>
         </widget>
        </item>

@@ -1,10 +1,13 @@
 import sys
 import numpy as np
 import random
-from PyQt5.QtCore import QTimer, QFile, QTextStream
-from PyQt5.QtWidgets import QMainWindow, QApplication, QVBoxLayout, QPushButton
+import cv2
+from PyQt5.QtCore import QTimer, QFile, QTextStream, Qt
+from PyQt5.QtWidgets import QMainWindow, QApplication, QVBoxLayout, QPushButton, QLabel, QSizePolicy
 import pyqtgraph as pg
-from sidebar_ui import Ui_MainWindow  # Import the generated UI module
+from PyQt5.QtGui import QPixmap, QImage
+from sidebar_ui import Ui_MainWindow  
+from video_player import VideoPlayer  
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -15,7 +18,7 @@ class MainWindow(QMainWindow):
 
         self.ui.icon_only_widget.hide()
         self.ui.stackedWidget.setCurrentIndex(0)
-        self.ui.home_btn_2.setChecked(True)
+        self.ui.scada_btn_2.setChecked(True)
 
         # Fixed length for the data arrays
         self.data_length = 100
@@ -32,36 +35,83 @@ class MainWindow(QMainWindow):
         self.graph_hopper = pg.PlotWidget()
         self.graph_head = pg.PlotWidget()
         self.graph_tail = pg.PlotWidget()
+
+         # Create additional plot widgets for labels
+        self.graph_hopper_label = pg.PlotWidget()
+        self.graph_head_label = pg.PlotWidget()
+        self.graph_tail_label = pg.PlotWidget()
         
-        # Replace frames with plot widgets
+        # Replace frames and labels with plot widgets
         self.ui.frame.setLayout(QVBoxLayout())
         self.ui.frame.layout().addWidget(self.graph_hopper)
+
+        self.ui.label_30.setLayout(QVBoxLayout())
+        self.ui.label_30.layout().addWidget(self.graph_hopper_label)
         
         self.ui.frame_4.setLayout(QVBoxLayout())
         self.ui.frame_4.layout().addWidget(self.graph_head)
+
+        self.ui.label_31.setLayout(QVBoxLayout())
+        self.ui.label_31.layout().addWidget(self.graph_head_label)
         
         self.ui.frame_6.setLayout(QVBoxLayout())
         self.ui.frame_6.layout().addWidget(self.graph_tail)
+
+        self.ui.label_40.setLayout(QVBoxLayout())
+        self.ui.label_40.layout().addWidget(self.graph_tail_label)
         
+        # Initialize QLabel widgets for live streaming
+        self.label_hopper_main = QLabel(self.ui.label_15)
         
+        self.label_head_main = QLabel(self.ui.label_23)
+        
+        self.label_tail_main = QLabel(self.ui.label_37)
+        
+        # Ensure QLabel widgets expand to fill the frames
+        self.label_hopper_main.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.label_hopper_main.setAlignment(Qt.AlignCenter)
+
+        self.label_head_main.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.label_head_main.setAlignment(Qt.AlignCenter)
+
+        self.label_tail_main.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.label_tail_main.setAlignment(Qt.AlignCenter)
+
+        # Start video capture
+        self.capture_hopper = cv2.VideoCapture(0)  # Change the argument to the camera index if needed
+        self.capture_head = cv2.VideoCapture(1)  # Change the argument to the camera index if needed
+        self.capture_tail = cv2.VideoCapture(2)  # Change the argument to the camera index if needed
+
+        # Set up QTimer for updating video frames
+        self.timer_video = QTimer()
+        self.timer_video.timeout.connect(self.update_video)
+        self.timer_video.start(100)  # Update video frames every 100 milliseconds
+
         # Setup timer for updating the plots
         self.timer = QTimer()
         self.timer.timeout.connect(self.update)
         self.timer.start(1000)  # Update every second
 
+        # Initialize and add VideoPlayer to label_55
+        self.video_player = VideoPlayer()
+        self.ui.label_55.setLayout(QVBoxLayout())
+        self.ui.label_55.layout().addWidget(self.video_player)
+
         self.connect_signals()
         
     def connect_signals(self):
-        self.ui.home_btn_1.toggled.connect(self.on_home_btn_1_toggled)
-        self.ui.home_btn_2.toggled.connect(self.on_home_btn_2_toggled)
-        self.ui.dashboard_btn_1.toggled.connect(self.on_dashboard_btn_1_toggled)
-        self.ui.dashboard_btn_2.toggled.connect(self.on_dashboard_btn_2_toggled)
-        self.ui.orders_btn_1.toggled.connect(self.on_orders_btn_1_toggled)
-        self.ui.orders_btn_2.toggled.connect(self.on_orders_btn_2_toggled)
-        self.ui.products_btn_1.toggled.connect(self.on_products_btn_1_toggled)
-        self.ui.products_btn_2.toggled.connect(self.on_products_btn_2_toggled)
-        self.ui.customers_btn_1.toggled.connect(self.on_customers_btn_1_toggled)
-        self.ui.customers_btn_2.toggled.connect(self.on_customers_btn_2_toggled)
+        self.ui.scada_btn_1.toggled.connect(self.on_scada_btn_1_toggled)
+        self.ui.scada_btn_2.toggled.connect(self.on_scada_btn_2_toggled)
+        self.ui.luna_btn_1.toggled.connect(self.on_luna_btn_1_toggled)
+        self.ui.luna_btn_2.toggled.connect(self.on_luna_btn_2_toggled)
+        self.ui.hopper_btn_1.toggled.connect(self.on_hopper_btn_1_toggled)
+        self.ui.hopper_btn_2.toggled.connect(self.on_hopper_btn_2_toggled)
+        self.ui.head_btn_1.toggled.connect(self.on_head_btn_1_toggled)
+        self.ui.head_btn_2.toggled.connect(self.on_head_btn_2_toggled)
+        self.ui.tail_btn_1.toggled.connect(self.on_tail_btn_1_toggled)
+        self.ui.tail_btn_2.toggled.connect(self.on_tail_btn_2_toggled)
+        self.ui.search_btn.clicked.connect(self.on_search_btn_clicked)
+        self.ui.user_btn.clicked.connect(self.on_user_btn_clicked)
         self.ui.search_btn.clicked.connect(self.on_search_btn_clicked)
         self.ui.user_btn.clicked.connect(self.on_user_btn_clicked)
         self.ui.stackedWidget.currentChanged.connect(self.on_stackedWidget_currentChanged)
@@ -92,19 +142,59 @@ class MainWindow(QMainWindow):
         tail_color = self.get_color(tail)
         
         # Update plots
-        self.graph_hopper.plotItem.clear()
-        self.graph_hopper.plotItem.plot(self.x, self.sensor_data_hopper, pen=hopper_color)
-        
-        self.graph_head.plotItem.clear()
-        self.graph_head.plotItem.plot(self.x, self.sensor_data_head, pen=head_color)
-        
-        self.graph_tail.plotItem.clear()
-        self.graph_tail.plotItem.plot(self.x, self.sensor_data_tail, pen=tail_color)
-        
+        self.update_plot(self.graph_hopper, self.sensor_data_hopper, hopper_color)
+        self.update_plot(self.graph_hopper_label, self.sensor_data_hopper, hopper_color)
+
+        self.update_plot(self.graph_head, self.sensor_data_head, head_color)
+        self.update_plot(self.graph_head_label, self.sensor_data_head, head_color)
+
+        self.update_plot(self.graph_tail, self.sensor_data_tail, tail_color)
+        self.update_plot(self.graph_tail_label, self.sensor_data_tail, tail_color)
+
         # Update labels with the latest sensor readings
         self.ui.label_5.setText(f'Hopper: {hopper:.2f}')
+        self.ui.label_53.setText(f'Hopper: {hopper:.2f}')
+
         self.ui.label_12.setText(f'Head: {head:.2f}')
+        self.ui.label_52.setText(f'Head: {head:.2f}')
+
         self.ui.label_14.setText(f'Tail: {tail:.2f}')
+        self.ui.label_54.setText(f'Tail: {tail:.2f}')
+
+    # Method to update a plot
+    def update_plot(self, plot_widget, data, color):
+        plot_widget.plotItem.clear()
+        plot_widget.plotItem.plot(self.x, data, pen=color)
+
+    def update_video(self):
+        # Read frames from cameras
+        ret_hopper, frame_hopper = self.capture_hopper.read()
+        ret_head, frame_head = self.capture_head.read()
+        ret_tail, frame_tail = self.capture_tail.read()
+
+        if ret_hopper:
+            # Convert the frame to RGB format
+            frame_hopper = cv2.cvtColor(frame_hopper, cv2.COLOR_BGR2RGB)
+            # Convert the frame to QImage
+            img_hopper = QImage(frame_hopper.data, frame_hopper.shape[1], frame_hopper.shape[0], QImage.Format_RGB888)
+            # Set the QImage to the QLabel
+            self.label_hopper_main.setPixmap(QPixmap.fromImage(img_hopper))
+
+        if ret_head:
+            # Convert the frame to RGB format
+            frame_head = cv2.cvtColor(frame_head, cv2.COLOR_BGR2RGB)
+            # Convert the frame to QImage
+            img_head = QImage(frame_head.data, frame_head.shape[1], frame_head.shape[0], QImage.Format_RGB888)
+            # Set the QImage to the QLabel
+            self.label_head_main.setPixmap(QPixmap.fromImage(img_head))
+
+        if ret_tail:
+            # Convert the frame to RGB format
+            frame_tail = cv2.cvtColor(frame_tail, cv2.COLOR_BGR2RGB)
+            # Convert the frame to QImage
+            img_tail = QImage(frame_tail.data, frame_tail.shape[1], frame_tail.shape[0], QImage.Format_RGB888)
+            # Set the QImage to the QLabel
+            self.label_tail_main.setPixmap(QPixmap.fromImage(img_tail))
 
     def get_color(self, value):
         if value > 8:
@@ -116,14 +206,14 @@ class MainWindow(QMainWindow):
 
     ## Function for searching
     def on_search_btn_clicked(self):
-        self.ui.stackedWidget.setCurrentIndex(5)
+        self.ui.stackedWidget.setCurrentIndex(6)
         search_text = self.ui.search_input.text().strip()
         if search_text:
             self.ui.label_9.setText(search_text)
 
     ## Function for changing page to user page
     def on_user_btn_clicked(self):
-        self.ui.stackedWidget.setCurrentIndex(6)
+        self.ui.stackedWidget.setCurrentIndex(7)
 
     ## Change QPushButton Checkable status when stackedWidget index changed
     def on_stackedWidget_currentChanged(self, index):
@@ -138,36 +228,47 @@ class MainWindow(QMainWindow):
                 btn.setAutoExclusive(True)
             
     ## functions for changing menu page
-    def on_home_btn_1_toggled(self):
+    def on_scada_btn_1_toggled(self):
         self.ui.stackedWidget.setCurrentIndex(0)
     
-    def on_home_btn_2_toggled(self):
+    def on_scada_btn_2_toggled(self):
         self.ui.stackedWidget.setCurrentIndex(0)
 
-    def on_dashboard_btn_1_toggled(self):
+    def on_luna_btn_1_toggled(self):
         self.ui.stackedWidget.setCurrentIndex(1)
 
-    def on_dashboard_btn_2_toggled(self):
+    def on_luna_btn_2_toggled(self):
         self.ui.stackedWidget.setCurrentIndex(1)
 
-    def on_orders_btn_1_toggled(self):
+    def on_hopper_btn_1_toggled(self):
         self.ui.stackedWidget.setCurrentIndex(2)
 
-    def on_orders_btn_2_toggled(self):
+    def on_hopper_btn_2_toggled(self):
         self.ui.stackedWidget.setCurrentIndex(2)
 
-    def on_products_btn_1_toggled(self):
+    def on_head_btn_1_toggled(self):
         self.ui.stackedWidget.setCurrentIndex(3)
 
-    def on_products_btn_2_toggled(self):
+    def on_head_btn_2_toggled(self):
         self.ui.stackedWidget.setCurrentIndex(3)
 
-    def on_customers_btn_1_toggled(self):
+    def on_tail_btn_1_toggled(self):
         self.ui.stackedWidget.setCurrentIndex(4)
 
-    def on_customers_btn_2_toggled(self):
+    def on_tail_btn_2_toggled(self):
         self.ui.stackedWidget.setCurrentIndex(4)
 
+    def on_power_btn_1_toggled(self):
+        self.ui.stackedWidget.setCurrentIndex(5)
+
+    def on_power_btn_2_toggled(self):
+        self.ui.stackedWidget.setCurrentIndex(5)
+
+    def on_history_btn_1_toggled(self):
+        self.ui.stackedWidget.setCurrentIndex(8)
+
+    def on_history_btn_2_toggled(self):
+        self.ui.stackedWidget.setCurrentIndex(8)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
