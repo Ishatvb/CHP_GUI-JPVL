@@ -13,6 +13,7 @@ import pyqtgraph as pg
 from PyQt5.QtGui import QPixmap, QImage
 from sidebar import Ui_MainWindow  
 from video_player import VideoPlayer  
+from Hopper_GUI import HopperWidget 
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -102,6 +103,11 @@ class MainWindow(QMainWindow):
         self.ui.label_55.setLayout(QVBoxLayout())
         self.ui.label_55.layout().addWidget(self.video_player)
 
+        # Initialize HopperWidget
+        self.hopper_widget = HopperWidget(self)
+        self.ui.label_16.setLayout(QVBoxLayout())
+        self.ui.label_16.layout().addWidget(self.hopper_widget)
+        
         self.connect_signals()
 
         #Initialize serial connections
@@ -172,6 +178,14 @@ class MainWindow(QMainWindow):
     def update(self):
         # Read new sensor data
         hopper, head, tail = self.read_sensor_data()
+
+        # Update coal level in the HopperWidget
+        coal_percentage = (9 - hopper) * 10  # Convert hopper data to percentage
+        self.hopper_widget.set_coal_level(coal_percentage)
+
+        # Shift data and update plots (existing code follows)
+        self.sensor_data_hopper = np.roll(self.sensor_data_hopper, -1)
+        self.sensor_data_hopper[-1] = hopper
 
         # Shift data to the left and append new data
         self.sensor_data_hopper = np.roll(self.sensor_data_hopper, -1)
