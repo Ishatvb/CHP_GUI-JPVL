@@ -2,7 +2,7 @@ import sys
 import numpy as np
 import random
 import cv2
-import serial 
+import serial
 import time
 import csv
 from datetime import datetime
@@ -140,13 +140,24 @@ class MainWindow(QMainWindow):
         self.ui.stackedWidget.currentChanged.connect(self.on_stackedWidget_currentChanged)
 
     def parse_lidar_data(data):
-    #print(data[1])
+        if len(data) < 4:
+            print("Insufficient data length")
+            return None
         if data[0] == 0x59 and data[1] == 0x59:
             distance = (data[3] << 8) | data[2]
             return distance / 100.0
         else:
             print("Invalid frame header")
             return None
+
+    # def parse_lidar_data(data):
+    # #print(data[1])
+    #     if data[0] == 0x59 and data[1] == 0x59:
+    #         distance = (data[3] << 8) | data[2]
+    #         return distance / 100.0
+    #     else:
+    #         print("Invalid frame header")
+    #         return None
 
     def read_sensor_data(self):
         # Simulate reading new data from sensors
@@ -162,9 +173,18 @@ class MainWindow(QMainWindow):
         data1 = self.ser1.read(9)
         data2 = self.ser2.read(9)
 
+        print("Raw Data Hopper:", data0)
+        print("Raw Data Head:", data1)
+        print("Raw Data Tail:", data2)
+
         hopper_data = self.parse_lidar_data(data0)
         head_data = self.parse_lidar_data(data1)
         tail_data = self.parse_lidar_data(data2)
+
+        # Check if the parsed data is valid
+        print("Parsed Hopper Data:", hopper_data)
+        print("Parsed Head Data:", head_data)
+        print("Parsed Tail Data:", tail_data)
 
         if hopper_data is not None and head_data is not None and tail_data is not None:
             print("Luna Distance_Hopper:", hopper_data * 100, "cm")
@@ -244,7 +264,6 @@ class MainWindow(QMainWindow):
 
         # Update the VideoPlayer component or other elements if needed
         self.video_player.update()  # Assuming VideoPlayer has an update method
-
 
     # Method to update a plot
     def update_plot(self, plot_widget, data, color):
