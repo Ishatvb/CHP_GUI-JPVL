@@ -13,12 +13,12 @@ import pyqtgraph as pg
 from PyQt5.QtGui import QPixmap, QImage
 from sidebar import Ui_MainWindow  
 from video_player import VideoPlayer  
-from Hopper_GUI import HopperWidget 
+from Hopper_GUI import HopperWidget
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
-        
+       
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
@@ -28,15 +28,15 @@ class MainWindow(QMainWindow):
 
         # Fixed length for the data arrays
         self.data_length = 100
-        
+       
         # Initialize sensor data containers
         self.sensor_data_hopper = np.zeros(self.data_length)
         self.sensor_data_head = np.zeros(self.data_length)
         self.sensor_data_tail = np.zeros(self.data_length)
-        
+       
         # Initialize x-axis values
         self.x = np.arange(self.data_length)
-        
+       
         # Create plot widgets
         self.graph_hopper = pg.PlotWidget()
         self.graph_head = pg.PlotWidget()
@@ -46,33 +46,33 @@ class MainWindow(QMainWindow):
         self.graph_hopper_label = pg.PlotWidget()
         self.graph_head_label = pg.PlotWidget()
         self.graph_tail_label = pg.PlotWidget()
-        
+       
         # Replace frames and labels with plot widgets
         self.ui.frame.setLayout(QVBoxLayout())
         self.ui.frame.layout().addWidget(self.graph_hopper)
 
         self.ui.label_30.setLayout(QVBoxLayout())
         self.ui.label_30.layout().addWidget(self.graph_hopper_label)
-        
+       
         self.ui.frame_4.setLayout(QVBoxLayout())
         self.ui.frame_4.layout().addWidget(self.graph_head)
 
         self.ui.label_31.setLayout(QVBoxLayout())
         self.ui.label_31.layout().addWidget(self.graph_head_label)
-        
+       
         self.ui.frame_6.setLayout(QVBoxLayout())
         self.ui.frame_6.layout().addWidget(self.graph_tail)
 
         self.ui.label_40.setLayout(QVBoxLayout())
         self.ui.label_40.layout().addWidget(self.graph_tail_label)
-        
+       
         # Initialize QLabel widgets for live streaming
         self.label_hopper_main = QLabel(self.ui.label_15)
-        
+       
         self.label_head_main = QLabel(self.ui.label_23)
-        
+       
         self.label_tail_main = QLabel(self.ui.label_37)
-        
+       
         # Ensure QLabel widgets expand to fill the frames
         self.label_hopper_main.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.label_hopper_main.setAlignment(Qt.AlignCenter)
@@ -107,13 +107,13 @@ class MainWindow(QMainWindow):
         self.hopper_widget = HopperWidget(self)
         self.ui.label_16.setLayout(QVBoxLayout())
         self.ui.label_16.layout().addWidget(self.hopper_widget)
-        
+       
         self.connect_signals()
 
         #Initialize serial connections
         self.ser0 = serial.Serial('/dev/ttyAMA0', 115200)
-        self.ser1 = serial.Serial('/dev/ttyAMA3', 115200, timeout=3)
-        self.ser2 = serial.Serial('/dev/ttyAMA4', 115200, timeout=3)
+        self.ser1 = serial.Serial('/dev/tty3', 115200, timeout=3)
+#         self.ser2 = serial.Serial('/dev/tty4', 115200, timeout=3)
 
         # Initialize CSV file
         self.csvfile = open('Experiment_1.csv', 'a', newline='')
@@ -121,7 +121,7 @@ class MainWindow(QMainWindow):
         self.writer = csv.DictWriter(self.csvfile, fieldnames=self.fieldnames)
         if self.csvfile.tell() == 0:
             self.writer.writeheader()
-        
+       
     def connect_signals(self):
         self.ui.scada_btn_1.toggled.connect(self.on_scada_btn_1_toggled)
         self.ui.scada_btn_2.toggled.connect(self.on_scada_btn_2_toggled)
@@ -162,34 +162,35 @@ class MainWindow(QMainWindow):
     def read_sensor_data(self):
         # Simulate reading new data from sensors
         # hopper_data = random.uniform(4, 9)  # Simulate hopper data
-        # head_data = random.uniform(3, 6)    # Simulate head data
-        # tail_data = random.uniform(3, 6)    # Simulate tail data
+        head_data = random.uniform(3, 6)    # Simulate head data
+        tail_data = random.uniform(3, 6)    # Simulate tail data
         # return hopper_data, head_data, tail_data
 
         self.ser0.reset_input_buffer()
-        self.ser1.reset_input_buffer()
-        self.ser2.reset_input_buffer()
+#         self.ser1.reset_input_buffer()
+#         self.ser2.reset_input_buffer()
         data0 = self.ser0.read(9)
-        data1 = self.ser1.read(9)
-        data2 = self.ser2.read(9)
+#         data1 = self.ser1.read(9)
+#         data2 = self.ser2.read(9)
 
-        # print("Raw Data Hopper:", data0)
-        # print("Raw Data Head:", data1)
-        # print("Raw Data Tail:", data2)
+        print("Raw Data Hopper:", data0)
+#         print("Raw Data Head:", data1)
+#         print("Raw Data Tail:", data2)
 
         hopper_data = self.parse_lidar_data(data0)
-        head_data = self.parse_lidar_data(data1)
-        tail_data = self.parse_lidar_data(data2)
+#         head_data = self.parse_lidar_data(data1)
+#         tail_data = self.parse_lidar_data(data2)
 
         # Check if the parsed data is valid
-        # print("Parsed Hopper Data:", hopper_data)
-        # print("Parsed Head Data:", head_data)
-        # print("Parsed Tail Data:", tail_data)
+        print("Parsed Hopper Data:", hopper_data)
+#         print("Parsed Head Data:", head_data)
+#         print("Parsed Tail Data:", tail_data)
 
         if hopper_data is not None and head_data is not None and tail_data is not None:
             print("Luna Distance_Hopper:", hopper_data * 100, "cm")
             print("Luna Distance_Head:", head_data * 100, "cm")
             print("Luna Distance_Tail:", tail_data * 100, "cm")
+
 
             return hopper_data * 100, head_data * 100, tail_data * 100
         else:
@@ -211,16 +212,16 @@ class MainWindow(QMainWindow):
         self.sensor_data_hopper = np.roll(self.sensor_data_hopper, -1)
         self.sensor_data_head = np.roll(self.sensor_data_head, -1)
         self.sensor_data_tail = np.roll(self.sensor_data_tail, -1)
-        
+       
         self.sensor_data_hopper[-1] = hopper
         self.sensor_data_head[-1] = head
         self.sensor_data_tail[-1] = tail
-        
+       
         # Determine plot color based on the latest value
         hopper_color = self.get_color_hopper(hopper)
         head_color = self.get_color_head(head)
         tail_color = self.get_color_tail(tail)
-        
+       
         # Update plots
         self.update_plot(self.graph_hopper, self.sensor_data_hopper, hopper_color)
         self.update_plot(self.graph_hopper_label, self.sensor_data_hopper, hopper_color)
@@ -277,7 +278,7 @@ class MainWindow(QMainWindow):
             return 'y'
         else:
             return 'g'
-        
+       
     def get_color_head(self, value):
         if value > 8:
             return 'r'
@@ -285,7 +286,7 @@ class MainWindow(QMainWindow):
             return 'y'
         else:
             return 'g'
-        
+       
     def get_color_tail(self, value):
         if value > 8:
             return 'r'
@@ -293,7 +294,7 @@ class MainWindow(QMainWindow):
             return 'y'
         else:
             return 'g'
-        
+       
     def write_to_csv(self, hopper, head, tail):
         try:
             current_time = datetime.now().strftime('%H:%M:%S')
@@ -350,10 +351,10 @@ class MainWindow(QMainWindow):
         # Define ranges for near-max and near-min values
         hopper_max_range = (hopper_max - 0.5, hopper_max + 0.5)
         hopper_min_range = (hopper_min - 0.5, hopper_min + 0.5)
-        
+       
         head_max_range = (head_max - 0.5, head_max + 0.5)
         head_min_range = (head_min - 0.5, head_min + 0.5)
-        
+       
         tail_max_range = (tail_max - 0.5, tail_max + 0.5)
         tail_min_range = (tail_min - 0.5, tail_min + 0.5)
 
@@ -420,18 +421,18 @@ class MainWindow(QMainWindow):
     def on_stackedWidget_currentChanged(self, index):
         btn_list = self.ui.icon_only_widget.findChildren(QPushButton) \
                     + self.ui.full_menu_widget.findChildren(QPushButton)
-        
+       
         for btn in btn_list:
             if index in [5, 6]:
                 btn.setAutoExclusive(False)
                 btn.setChecked(False)
             else:
                 btn.setAutoExclusive(True)
-            
+           
     ## functions for changing menu page
     def on_scada_btn_1_toggled(self):
         self.ui.stackedWidget.setCurrentIndex(0)
-    
+   
     def on_scada_btn_2_toggled(self):
         self.ui.stackedWidget.setCurrentIndex(0)
 
@@ -480,7 +481,7 @@ class MainWindow(QMainWindow):
         # Cleanup serial connections and CSV file on exit
         self.ser0.close()
         self.ser1.close()
-        self.ser2.close()
+#         self.ser2.close()
         self.csvfile.close()
         self.capture_hopper.release()
         self.capture_head.release()
